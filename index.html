@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お助け</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #87CEEB, #4682B4, #1E90FF);
+            font-family: 'Hiragino Sans', 'ヒラギノ角ゴシック', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            text-align: center;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 100px;
+        }
+
+        .breadcrumb {
+            background: #f8f8f8;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .breadcrumb-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .breadcrumb-item {
+            display: inline;
+            color: #666;
+        }
+
+        .breadcrumb-item.clickable {
+            color: #333;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .breadcrumb-item.clickable:hover {
+            background-color: #e9ecef;
+            color: #0056b3;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .description img{
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: block;
+        }
+
+        .hint-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .hint-button:hover {
+            background: #555;
+        }
+
+        .hint-button:last-child {
+            margin-bottom: 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .answer-text {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">お助け</h1>
+    <div class="container">
+        <div class="breadcrumb" id="breadcrumb">
+            <div id="breadcrumbPath"></div>
+            <div class="breadcrumb-info" id="breadcrumbInfo" style="display: none;">※ヒントのタイトルをタップするとその画面に戻れる</div>
+        </div>
+        
+        <div class="content">
+            <div class="title">
+                <span id="pageTitle">お助け</span>
+                <button class="back-button" id="backButton" onclick="goBack()" style="display: none;">←</button>
+            </div>
+            
+            <div id="pageContent"></div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // ヒントデータの定義
+        const hintData = {
+            // メインページ（最初に表示されるページ）
+            main: {
+                title: "目次",
+                description: "ヒントを見たいフェーズをタップしろ。",
+                buttons: [
+                    { text: "1st stageのヒント", action: "stage1" },
+                    { text: "2nd stageのヒント", action: "stage2" },
+                    { text: "3rd stageのヒント", action: "stage3" },
+                ]
+            },
+
+            // ========== 1stステージのヒント関連 ==========
+            // 1stステージのメインページ
+            stage1: {
+                title: "1st stageのヒント",
+                description: "どのヒントを見たいか選択しな。",
+                buttons: [
+                    { text: "Aのヒント", action: "stage1_A" },
+                    { text: "Bのヒント", action: "stage1_B" },
+                    { text: "Cのヒント", action: "stage1_C" },
+                    { text: "Dのヒント", action: "stage1_D" },
+                    { text: "Eのヒント", action: "stage1_E" },
+                    { text: "全ての答えを埋めた後のヒント", action: "stage1_after_answer" },
+                ]
+            },
+
+            // 1stステージ Aのヒント集
+            stage1_A: {
+                title: "Aのヒント",
+                description: "4つの絵は パトカー／パプリカ／カセット／カプセル だ。<br>4つの共通する文字である「か」が盤面の中央にあるな。",
+                buttons: [
+                    { text: "Aのヒント続き", action: "stage1_A_2" },
+                ]
+            },
+
+            stage1_A_2: {
+                title: "Aのヒント続き",
+                description: "イラストの周りにある丸にはそのイラストを表す言葉に含まれる文字が入る。<br>つまり、隣り合う絵の間の丸には、2つのイラストに共通する文字が入るというわけだ。それを手掛かりにして①と②に入る言葉を導け。",
+                buttons: [
+                    { text: "Aの答え", action: "stage1_A_Ans" },
+                ]
+            },
+
+            stage1_A_Ans: {
+                title: "Aの答え",
+                description: "①=「る」、②=「ー」となる。よって、答えは「ルール」だ。"
+            },
+
+            // 1stステージ Bのヒント集
+            stage1_B: {
+                title: "Bのヒント",
+                description: "イラストの名前は一切関係ない。イラストの【見た目】に注目して、6x6の盤面と見比べるのが大事だ。",
+                buttons: [
+                    { text: "Bのヒント続き", action: "stage1_B_2" },
+                ]
+            },
+
+            stage1_B_2: {
+                title: "Bのヒント続き",
+                description: "注目するのは色だ。",
+                buttons: [
+                    { text: "Bのヒントさらに続き", action: "stage1_B_3" },
+                ]
+            },
+
+            stage1_B_3: {
+                title: "Bのヒントさらに続き",
+                description: "スリッパは水色だな。盤面の水色の線を見ると、「コ」になっている。<br>そして、炎は赤と橙で作られている。赤線と橙線を見ると「ト」になる。<br>同じように考えよう。パプリカは赤と緑、きゅうりは緑、米は...白だな。",
+                buttons: [
+                    { text: "Bの最後のヒント", action: "stage1_B_4" },
+                ]
+            },
+
+            stage1_B_4: {
+                title: "Bの最後のヒント",
+                description: "パプリカは「オ」、きゅうりは「ナ」だな。白はどこにもないように見えるな、だが確かに存在する。<br>6x6の盤面ということは正方形が36個並んだもののはずだが、ところどころ線が消えていて正方形で無くなっている部分があるな。<br>線が消えているのではなく、見えなくなっていると考えるとどうなるだろうか。",
+                buttons: [
+                    { text: "Bの答え", action: "stage1_B_Ans" },
+                ]
+            },
+
+            stage1_B_Ans: {
+                title: "Bの答え",
+                description: "黒線が消えている箇所が白線がある場所と考えられる。その形を考えると、「ジ」であるとわかる。よって、答えは「オナジ(同じ)」だ。",
+                image: "images/1st/B_答え.png"
+            },
+
+            // 1stステージ Cのヒント集
+            stage1_C: {
+                title: "Cのヒント",
+                description: "上の例に注目だ。トラのイラストと「び」が扉になるようだ。文字で見ることで何か気づけないだろうか。<br>補足だが、右上のイラストは「うさぎ」と考えない方が良い。",
+                buttons: [
+                    { text: "Cのヒント続き", action: "stage1_C_2" },
+                ]
+            },
+
+            stage1_C_2: {
+                title: "Cのヒント続き",
+                description: "この問題はイラストの名称と文字を並び替えたものが別のイラストの名称になっていた。<br>つまり、「イス」と「ら」を足してできた「ライス」にさらに「と」を足して並び替えた言葉が答えになるということだ。実は答えは目の前にあるぞ。",
+                buttons: [
+                    { text: "Cの答え", action: "stage1_C_Ans" },
+                ]
+            },
+
+            stage1_C_Ans: {
+                title: "Cの答え",
+                description: "「ら」「い」「す」「と」を並び替えることで、答えは「イラスト」だ。"
+            },
+
+
+            // 1stステージ Dのヒント集
+            stage1_D: {
+                title: "Dのヒント",
+                description: "迷路を正しくしりとりの順に通ろう。まず「スリッパ」。そこから「パンダ」か「パイナップル」か迷っただろう。<br>仮にパンダの方に進んだ場合、「大工」に行けるが、そこからは「団子」か「パイナップル」にしかいけず、しりとりとして繋がらない。よって、「パンダ」に行くのは誤りだ。「パイナップル」に向かえ。",
+                image: "images/1st/D_最初の進み方.png",
+                buttons: [
+                    { text: "Dのヒント続き", action: "stage1_D_2" },
+                ]
+            },
+
+            stage1_D_2: {
+                title: "Dのヒント続き",
+                description: "迷路は スリッパ／パイナップル／ルービックキューブ／ブドウ／うどん の順に通ることで、「食べ物だけ食べた後 再スタート」と出てくる。<br>つまり、迷路に登場する食べ物だけを食べて、もう一度迷路をやり直す必要がある。",
+                image: "images/1st/D_最初のルート.png",
+                buttons: [
+                    { text: "Dのヒントさらに続き", action: "stage1_D_3" },
+                ]
+            },
+
+            stage1_D_3: {
+                title: "Dのヒントさらに続き",
+                description: "パイナップルを食べたということは、「スリッパ」から行けるのが「パンダ」しかないな。そこから「大工」を通って右に行く。そこから進みたいが「く」から始まるイラストがないように見えるかもしれない。<br>本当にないのだろうか。食べ物だけ食べることによって変化が起こるイラストはないか。",
+                buttons: [
+                    { text: "Dの最後のヒント", action: "stage1_D_4" },
+                ]
+            },
+
+            stage1_D_4: {
+                title: "Dの最後のヒント",
+                description: "食べ物のイラストを食べるからと言って、イラストが完全に消えるわけではない。食べ物【だけ】を食べるということは食べ物ではないものは残る。<br>それを踏まえると、団子のイラストは完全に消えるのだろうか。",
+                buttons: [
+                    { text: "Dの答え", action: "stage1_D_Ans" },
+                ]
+            },
+
+            stage1_D_Ans: {
+                title: "Dの答え",
+                description: "団子は食べられることで串だけが残る。そうなると、 大工／串／鹿／缶 としりとりで繋ぐことができ、通る文字は「こたえはるーぷ」。<br>よって、答えはループだ。"
+            },
+
+            // 1stステージ Eのヒント集
+            stage1_E: {
+                title: "Eのヒント",
+                description: "それぞれのイラストは「木」「イギリス」「缶」「スイカ」だ。<br>「木」「イギリス」と「キリギリス」、比べると言葉が似ているな。",
+                buttons: [
+                    { text: "Eのヒント続き", action: "stage1_E_2" },
+                ]
+            },
+
+            stage1_E_2: {
+                title: "Eのヒント続き",
+                description: "木とイギリスの間にアルファベットがあると言うことは、イラストの名前をアルファベットに変換して考えると良い。<br>英語ではないぞ。",
+                buttons: [
+                    { text: "Eの答え", action: "stage1_E_Ans" },
+                ]
+            },
+
+            stage1_E_Ans: {
+                title: "Eの答え",
+                description: "各イラストの名前をローマ字表記で書き、続けて読んだものが単語になる。<br>よって、T+suika = Tsuika(追加)が正解だ。"
+            },
+
+            // 1stステージ 中謎集
+            stage1_after_answer: {
+                title: "全ての答えを埋めた後のヒント",
+                description: "全ての答えを埋めると、【ルールに「同じイラストで必ずワープ」を追加し、初めから解き直せ。】となる。<br>「ルール」が登場する謎といえばなんだっただろうか。",
+                buttons: [
+                    { text: "何の謎か知りたい", action: "stage1_after_answer_rule_riddle"},
+                ]
+            },
+
+            stage1_after_answer_rule_riddle: {
+                title: "何の謎か知りたい",
+                description: "Dの謎には迷路のルールが記載されていた。このルールに先ほど完成した文を追加して、初めから迷路を解き直せば良い。<br>初めからということはDの謎を解いた時の「食べ物を食べる」は無かったことにして、初めから解き直すということだぞ。",
+                buttons: [
+                    { text: "迷路が解けない", action: "stage1_after_answer_want_to_see_the_root"},
+                ]
+            },
+
+            stage1_after_answer_want_to_see_the_root: {
+                title: "迷路が解けない",
+                description: "まず初めに「スリッパ」のイラストを通る。これまでは通り過ぎて壁にぶつかるまで直進していたが、今回は同じ「スリッパ」のイラストにワープしなければいけない。<br>しかし、Dの迷路の中には他にスリッパは見当たらない。このスリッパ、どこかで見たことはないか。",
+                image: "images/1st/中謎_スリッパワープ.png",
+                buttons: [
+                    { text: "スリッパの在処を知りたい", action: "stage1_after_answer_found_slipper"},
+                ]
+            },
+
+            stage1_after_answer_found_slipper: {
+                title: "スリッパの在処を知りたい",
+                description: "スリッパはBの謎にあった。つまり、Bの謎のスリッパから下に進む必要がある。そう、今回の迷路は様々な謎を行き来して、ゴールまで進む必要がある。<br>その時に通った文字を順に読め。灰色の壁にぶつかるまで曲がってはいけないことを忘れるなよ。",
+                buttons: [
+                    { text: "通り方の一部を知りたい", action: "stage1_after_answer_tell_part_of_root"},
+                ]
+            },
+
+            stage1_after_answer_tell_part_of_root: {
+                title: "通り方の一部を知りたい",
+                description: "スリッパを通った時は下方向に進んでいたな。つまり、このまま下に行く必要がある。<br>そうすると、問題の枠である灰色の壁にぶつかるはずだ。そこから右に進むことで、「パプリカ」のイラストに辿り着く、これはしりとりとしても繋がっているのがわかる。<br>この時、通った文字は「答えは」だな。<br>さて、次は「パプリカ」のイラストを見つけ、ワープしたら右に進もう。",
+                image: "images/1st/中謎_スリッパtoパプリカ.png",
+                buttons: [
+                    { text: "1st stageの答えを知りたい", action: "stage1_after_answer_final_answer"},
+                ]
+            },
+
+            stage1_after_answer_final_answer: {
+                title: "1st stageの答えを知りたい",
+                description: "Aのパプリカまでワープした後は、「Aパプリカ」→【か】→「Aカセット」→「Dカセット」→「D扉」→「C扉」→【っ】→「Cライス」→「Dライス」→「Dスイカ」→「Eスイカ」→【と】→「E缶」→「D缶」→ (ゴール)となる。<br>通った文字を読むと、【答えはかっと】となるので、答えは【カット】だ。",
+                images: [
+                "images/1st/中謎_パプリカtoカセット.png",
+                "images/1st/中謎_カセットto扉.png",
+                "images/1st/中謎_扉toライス.png",
+                "images/1st/中謎_ライスtoスイカ.png",
+                "images/1st/中謎_スイカto缶.png",
+                "images/1st/中謎_缶toGoal.png"
+                ]
+            },
+
+            // ========== 2ndステージのヒント関連 ==========
+            // 2ndステージのメインページ
+            stage2: {
+                title: "2nd stageのヒント",
+                description: "どのヒントを見たいか選択しな。",
+                buttons: [
+                    { text: "謎が復元できない", action: "stage2_before_fix" },
+                    { text: "謎は復元できたが、解けない謎がある", action: "stage2_after_fix" },
+                    { text: "全ての答えを埋めた後のヒント", action: "stage2_after_answer" },
+                ]
+            },
+
+            // 2ndステージの復元
+            stage2_before_fix: {
+                title: "謎が復元できない",
+                description: "似ている形があったり向きがわからないものがあったり復元が難しいかもしれない。<br>しかし、あることに気づけば実は迷うことなく復元できる。",
+                buttons: [
+                    { text: "「あること」についての手がかりが知りたい", action: "stage2_tell_the_other_side" },
+                ]
+            },
+
+            stage2_tell_the_other_side: {
+                title: "「あること」についての手がかりが知りたい",
+                description: "いろいろな情報が書かれている表面を見ながら完成したくなると思う。<br>しかし、注目するのは裏側だ。",
+                buttons: [
+                    { text: "「あること」が何か知りたい", action: "stage2_tell_the_other_side_2" },
+                ]
+            },
+
+            stage2_tell_the_other_side_2: {
+                title: "「あること」が何か知りたい",
+                description: "裏にある様々な線によって切られたわけだが、線には太さがある。つまり、切られた後にはその線の色が残っているということだ。そこに注目すれば、ピースの位置も向きも迷うことなく合わせることができる。",
+                buttons: [
+                    { text: "完成した謎が見たい", action: "stage2_show_the_riddle" },
+                ]
+            },
+
+            stage2_show_the_riddle: {
+                title: "完成した謎が見たい",
+                description: "完成図はこの通りだ。",
+                images: [
+                    "images/2nd/復元_F.png",
+                    "images/2nd/復元_G.png",
+                    "images/2nd/復元_H.png",
+                    "images/2nd/復元_I.png",
+                ]
+            },
+
+            // 2ndステージの小謎ページ
+            stage2_after_fix: {
+                title: "謎は復元できたが、解けない謎がある",
+                description: "どの問題のヒントを見たいんだ。",
+                buttons: [
+                    { text: "Fのヒント", action: "stage2_F" },
+                    { text: "Gのヒント", action: "stage2_G" },
+                    { text: "Hのヒント", action: "stage2_H" },
+                    { text: "Iのヒント", action: "stage2_I" },
+                ]
+            },
+
+            // 2ndステージ Fのヒント集
+            stage2_F: {
+                title: "Fのヒント",
+                description: "イラストは氷柱(つらら)を表している。なぜこの3枚で氷柱になるかを考えよう。",
+                buttons: [
+                    { text: "Fのヒント続き", action: "stage2_F_2" },
+                ]
+            },
+
+            stage2_F_2: {
+                title: "Fのヒント続き",
+                description: "折られていない紙には「ら」と書かれている。これとイラストが氷柱を表していることから、半分に折られた紙は「つ」を表すとわかる。<br>なぜ折ることによって「つ」になるのか。「ら」の紙をよく見たらわかるかもな。",
+                buttons: [
+                    { text: "Fのヒントさらに続き", action: "stage2_F_3" },
+                ]
+            },
+
+            stage2_F_3: {
+                title: "Fのヒントさらに続き",
+                description: "各紙が表す文字は、その状態で見えている文字を表している。半分におられた紙は上半分が見えなくなることで「つ」になる。<br>そうなると、左上が折られた紙はどうなるだろうか。",
+                image: "images/2nd/F_つ.png",
+                buttons: [
+                    { text: "Fの答え", action: "stage2_F_Ans" },
+                ]
+            },
+
+            stage2_F_Ans: {
+                title: "Fの答え",
+                description: "左上が折られた紙は「う」を表している。よって答えは「裏(うら)」だ。",
+                image: "images/2nd/F_答え.png"
+            },
+
+            // 2ndステージ Gのヒント集
+            stage2_G: {
+                title: "Gのヒント",
+                description: "デジタル数字の「206」に見えるが、数字として見てはいけない。<br>上の盤面と見比べよう。",
+                buttons: [
+                    { text: "Gのヒント続き", action: "stage2_G_2" },
+                ]
+            },
+
+            stage2_G_2: {
+                title: "Gのヒント続き",
+                description: "イラストは「ねずみ」を表している。上の盤面にも「ね」「ず」「み」の文字があるな。",
+                buttons: [
+                    { text: "Gのヒントさらに続き", action: "stage2_G_3" },
+                ]
+            },
+
+            stage2_G_3: {
+                title: "Gのヒントさらに続き",
+                description: "「206」の上半分の形が「ねずみ」になる。その形に注目して改めて盤面を見比べよう。<br>解き方がわかったら、同じことを下半分でも行うんだ。",
+                buttons: [
+                    { text: "Gの答え", action: "stage2_G_Ans" },
+                ]
+            },
+
+            stage2_G_Ans: {
+                title: "Gの答え",
+                description: "形と共通するものを盤面から見つけ、そこに書かれている文字を順に読むという問題だった。「206」の下半分はそれぞれ盤面の「み」「ど」「り」と形が対応している。よって答えは「緑(みどり)」だ。",
+                image: "images/2nd/G_答え.png"
+            },
+
+            // 2ndステージ Hのヒント集
+            stage2_H: {
+                title: "Hのヒント",
+                description: "問題番号のHにも赤線が引かれているな。「H」の形に注目し、各図形に引かれた赤い線はどういうものかを考えろ。",
+                buttons: [
+                    { text: "Hのヒント続き", action: "stage2_H_2" },
+                ]
+            },
+
+            stage2_H_2: {
+                title: "Hのヒント続き",
+                description: "赤線は対象の軸を表していた。黒い線を赤線でを軸にしてコピーすると、全てアルファベットの文字になる。<br>最終的にできる6文字のアルファベットをローマ字として読め。",
+                buttons: [
+                    { text: "Hの答え", action: "stage2_H_Ans" },
+                ]
+            },
+
+            stage2_H_Ans: {
+                title: "Hの答え",
+                description: "T、O、U、M、E、Iとなるので、続けて読むとTOUMEI(透明)となる。"
+            },
+
+            // 2ndステージ Iのヒント集
+            stage2_I: {
+                title: "Iのヒント",
+                description: "盤面から「三角」「雲」「月」「四角」を探そう。2つの記号を一直線で結び、線上の文字を順に読むとそれぞれ「いか」「うし」になっているな。<br>同じように「円 → 点」を考えよう。",
+                buttons: [
+                    { text: "Iのヒント続き", action: "stage2_I_2" },
+                ]
+            },
+
+            stage2_I_2: {
+                title: "Iのヒント続き",
+                description: "点は盤面の中にあるが、円は盤面の中に見当たらないだろう。<br>問題文には「この【紙】から記号を探せ。」と書かれているな。<br>盤面から探すのではなく、この紙から円を探そう。",
+                buttons: [
+                  { text: "Iの答え", action: "stage2_I_Ans" },
+                  ]
+            },
+
+            stage2_I_Ans: {
+                title: "Iの答え",
+                description: "「点」は盤面の中黒「・」、「円」は問題文の句点「。」である。<br>この2つを一直線で結ぶと「や」「じ」「る」「し」となるので、答えは「やじるし（矢印）」だ。"
+            },
+
+            // 2ndステージ 中謎集
+            stage2_after_answer: {
+                title: "全ての答えを埋めた後のヒント",
+                description: "完成した指示は【裏の緑の線を切り、4つの紙で透明な矢印を作れ】だな。<br>各謎の裏にある緑の線を切るということだ。緑の線のみで切った時に、どのように分かれるかを一度整理することを推奨する。",
+                buttons: [
+                  { text: "矢印の作り方のヒントが欲しい", action: "stage2_after_answer_how_to_make_arrow" },
+                  ]
+            },
+
+            stage2_after_answer_how_to_make_arrow: {
+                title: "矢印の作り方のヒントが欲しい",
+                description: "4つの紙でIの謎のような矢印を作ることができる。『透明な』矢印を作るためにはどのように紙を使用すれば作れそうか。",
+                buttons: [
+                  { text: "透明な矢印のヒントが欲しい", action: "stage2_after_answer_invisible_arrow" },
+                  ]
+            },
+
+            stage2_after_answer_invisible_arrow: {
+                title: "透明な矢印のヒントが欲しい",
+                description: "透明とは白色ということでもない。つまり、4つの紙がそのまま矢印の形になるというわけではない。<br>それを踏まえ、どのようにすれば透明な矢印を作ることができるか。",
+                buttons: [
+                  { text: "矢印の作り方のヒントがさらに欲しい", action: "stage2_after_answer_invisible_arrow_2" },
+                  ]
+            },
+
+            stage2_after_answer_invisible_arrow_2: {
+                title: "矢印の作り方のヒントがさらに欲しい",
+                description: "4つの紙を中心に隙間ができるように置くことで、中心に矢印の輪郭、つまり透明な矢印が出来上がるようになっている。<br>それを踏まえ、どのピースを使うのが正しいのだろうか。",
+                buttons: [
+                  { text: "使う4枚の紙が知りたい", action: "stage2_after_answer_pieces" },
+                  ]
+            },
+
+            stage2_after_answer_pieces: {
+                title: "使うピースが知りたい",
+                description: "各謎の小さい方の紙を使っていたか？<br>実は大きい方しか使わないんだ。",
+                buttons: [
+                  { text: "2nd stageの答えが知りたい", action: "stage2_after_answer_final_answer" },
+                  ]
+            },
+
+            stage2_after_answer_final_answer: {
+                title: "2nd stageの答えが知りたい",
+                description: "各謎の大きい方の紙を欠けている箇所が中心になるようにして四枚を並べると、中心に右上を向いた透明な矢印が出来上がる。<br>その矢印が指す方を進んでいくと、Gの謎の盤面の「く」「り」「あ」を通る。<br>よって、答えはクリアだ。",
+                image: "images/2nd/2nd_答え.png"
+            },
+
+            // ========== 3rdステージのヒント関連 ==========
+            // 3rdステージのメインページ
+            stage3: {
+                title: "3rd stageのヒント",
+                description: "どのヒントを見たいかを選択してください",
+                buttons: [
+                    { text: "振り返れ の意味がわからない", action: "stage3_what_to_use" },
+                    { text: "振り返れ の意味がわかったが、各謎の答えがわからない", action: "stage3_answers" },
+                    { text: "塗りつぶした後がわからない", action: "stage3_destroy" },
+                ]
+            },
+
+            // 3rdステージの振り返りについて
+            stage3_what_to_use: {
+                title: "振り返れ の意味がわからない",
+                description: "当たり前だが、本当に実際に後ろを振り返っても何もない。<br>解答用紙の背景にある盤面、どこかで見覚えがないだろうか。そういう意味での振り返りだ。",
+                buttons: [
+                    { text: "盤面の正体が知りたい", action: "stage3_reveral_the_table" },
+                ]
+            },
+
+            stage3_reveral_the_table: {
+                title: "盤面の正体が知りたい",
+                description: "実は【2nd stageのIの謎の盤面】を使う問題だ。確かに6x6の点線で作られた盤面と特徴が一致している。<br>だから3rd stageの謎が無くても導けると言ったんだ。<br>次はどうやってここから答えを導くかだな。",
+                buttons: [
+                    { text: "振り返れ の意味がわかったが、各謎の答えがわからない", action: "stage3_answers" },
+                    { text: "塗りつぶした後がわからない", action: "stage3_destroy" },   
+                ]
+            },
+
+            // 3rdステージの振り返りについて
+            stage3_answers: {
+                title: "振り返れ の意味がわかったが、各謎の答えがわからない",
+                description: "解答用紙には「記号と文字が繋がった6つの答え」と書かれている。つまり、記号と文字によって作られた答えが6つ存在するということだ。",
+                buttons: [
+                    { text: "答えがわかる方法の手がかりが知りたい", action: "stage3_answers_tell_the_method" },
+                ]
+            },
+
+            stage3_answers_tell_the_method: {
+                title: "答えがわかる方法の手がかりが知りたい",
+                description: "Jの答えから考えよう。解答用紙のJの部分を見ると、<br>1文字+3文字の記号+2文字の記号+2文字<br>で構成されている単語とわかる。<br>答えに自信がない時はあの方法が使えるはずだ。",
+                buttons: [
+                    { text: "Jの謎の答えが知りたい", action: "stage3_answers_J" },
+                ]
+            },
+
+            stage3_answers_J: {
+                title: "Jの謎の答えが知りたい",
+                description: "Jの答えは「野球選手(や 球 線 し ゅ)」だ。<br>これを実際に進行用アカウントに送信することで、Jの謎の答えであることが確認できたはずだ。<br>同様の方法で他の謎の答えも見つけていけ。",
+                buttons: [
+                    { text: "3rd stageの全ての答えが知りたい", action: "stage3_answers_all_answer" },
+                ]
+            },
+
+            stage3_answers_all_answer: {
+                title: "3rd stageの全ての答えが知りたい",
+                description: "J ... 野球選手(や 球 線 し ゅ)<br>K ... 三角定規(三角 じ ょ う ぎ)<br>L ... ダイヤル(ダイヤ る)<br>M ... 加湿器(か し 月)<br>N ... 曇り(雲 り)<br>O ... シスター(し スター)",
+                buttons: [
+                    { text: "塗りつぶした後がわからない", action: "stage3_destroy" },
+                ]
+            },
+
+            stage3_destroy: {
+                title: "塗りつぶした後がわからない",
+                description: "全ての答えを塗りつぶすと画像のようになるな。私が書いた実施内容の3.には『指示に従い』とあるな。つまり、どこかに指示があるはずだ。",
+                image: "images/3rd/塗りつぶし後の盤面.png",
+                buttons: [
+                    { text: "指示がどこにあるか知りたい", action: "stage3_know_the_place_of_order" },
+                ]
+            },
+
+            stage3_know_the_place_of_order: {
+                title: "指示がどこにあるか知りたい",
+                description: "盤面の塗りつぶされていない部分全体が指示になっていたんだ。左上から右に向かって読んでみよう。記号が途中であるが、記号も読むんだぞ。",
+                buttons: [
+                    { text: "指示を知りたい", action: "stage3_know_the_order" },
+                ]
+            },
+
+            stage3_know_the_order: {
+                title: "指示を知りたい",
+                description: "Iの謎で示されているように「◻︎」は四角(しかく)、「・」は点(てん)だ。<br>つまり、現れた指示文は「赤い紙剥がし隠された点数ゲット(あかいかみはが しかく された てん すうげっと)」となる。",
+                buttons: [
+                    { text: "赤い紙の手がかりが欲しい", action: "stage3_find_the_red_paper" },
+                ]
+            },
+
+            stage3_find_the_red_paper: {
+                title: "赤い紙の手がかりが欲しい",
+                description: "赤い紙は実際にどこかにある。そして絶対にそれを目にしているはずだ。<br>近いところにあるかもしれないぞ。",
+                buttons: [
+                    { text: "赤い紙の場所が知りたい", action: "stage3_know_the_red_paper" },
+                ]
+            },
+
+            stage3_know_the_red_paper: {
+                title: "赤い紙の場所が知りたい",
+                description: "赤い紙は1st stageの封筒に貼られている紙のことだ。これを剥がせ。<br>剥がすのに抵抗があるか？<br>大丈夫だ、注意事項に物を壊してはいけないのような注意事項はないからな。<br>点数が出てきたら裏にある合言葉を進行用アカウントに送れ。",
+            },
+
+        };
+
+        // 現在の状態を管理
+        let currentPath = ['main'];
+        
+        // ページを表示する関数
+        function showPage(pageKey) {
+        const page = hintData[pageKey];
+        if (!page) return;
+
+        document.getElementById('pageTitle').textContent = page.title;
+
+        const content = document.getElementById('pageContent');
+        content.innerHTML = '';
+
+        let description; // ←参照できるように外に出す
+
+        // 説明文を追加
+        if (page.description) {
+            description = document.createElement('div');
+            description.className = 'description';
+            description.innerHTML = page.description;
+
+            if (page.image) {
+            const img = document.createElement('img');
+            img.src = page.image;
+            img.alt = 'ヒント画像';
+            description.appendChild(img);
+            }
+
+            if (page.images && Array.isArray(page.images)) {
+            page.images.forEach((src, i) => {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `ヒント画像${i + 1}`;
+                description.appendChild(img);
+            });
+            }
+
+            content.appendChild(description);
+        }
+
+        // ボタンを追加（あるときだけ）
+        const hasButtons = Array.isArray(page.buttons) && page.buttons.length > 0;
+        if (hasButtons) {
+            page.buttons.forEach(button => {
+            const btn = document.createElement('button');
+            btn.className = 'hint-button';
+            btn.textContent = button.text;
+            btn.onclick = () => navigateTo(button.action);
+            content.appendChild(btn);
+            });
+        } else {
+            // ボタンが無い＝答えページ想定：見た目だけ差をつけたいならクラスを付与
+            if (description) description.classList.add('answer-text');
+            // ※ content.innerHTML = '' は絶対にしない！
+        }
+
+        const backButton = document.getElementById('backButton');
+        backButton.style.display = currentPath.length > 1 ? 'block' : 'none';
+
+        updateBreadcrumb();
+        }
+
+        // ページ遷移の関数
+        function navigateTo(pageKey) {
+            currentPath.push(pageKey);
+            showPage(pageKey);
+        }
+
+        // 戻る関数
+        function goBack() {
+            if (currentPath.length > 1) {
+                currentPath.pop();
+                showPage(currentPath[currentPath.length - 1]);
+            }
+        }
+
+        // ブレッドクラムを更新する関数
+        function updateBreadcrumb() {
+            const breadcrumbPath = document.getElementById('breadcrumbPath');
+            const breadcrumbInfo = document.getElementById('breadcrumbInfo');
+            breadcrumbPath.innerHTML = '';
+
+            currentPath.forEach((pageKey, index) => {
+                const page = hintData[pageKey];
+                if (!page) return;
+
+                if (index > 0) {
+                    const separator = document.createElement('span');
+                    separator.textContent = ' > ';
+                    breadcrumbPath.appendChild(separator);
+                }
+
+                const item = document.createElement('span');
+                item.className = 'breadcrumb-item';
+                item.textContent = page.title;
+
+                // 最後の項目以外はクリック可能にする
+                if (index < currentPath.length - 1) {
+                    item.className += ' clickable';
+                    item.onclick = () => {
+                        // クリックした位置まで戻る
+                        currentPath = currentPath.slice(0, index + 1);
+                        showPage(currentPath[currentPath.length - 1]);
+                    };
+                }
+
+                breadcrumbPath.appendChild(item);
+            });
+
+            // クリック可能な項目があるかチェックしてヒント表示を制御
+            const hasClickableItems = currentPath.length > 1;
+            breadcrumbInfo.style.display = hasClickableItems ? 'block' : 'none';
+        }
+
+        // 初期ページを表示
+        showPage('main');
+    </script>
+</body>
+</html>
