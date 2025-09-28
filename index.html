@@ -431,6 +431,9 @@
                     "images/2nd/復元_G.png",
                     "images/2nd/復元_H.png",
                     "images/2nd/復元_I.png",
+                ],
+                buttons: [
+                    { text: "謎は復元できたが、解けない謎がある", action: "stage2_after_fix" },
                 ]
             },
 
@@ -564,7 +567,7 @@
 
             stage2_after_answer_how_to_make_arrow: {
                 title: "矢印の作り方のヒントが欲しい",
-                description: "4つの紙でIの謎のような矢印が作れ。だが、『透明』が条件だ。透明はどう実現すれば良いだろうか。",
+                description: "矢印の形はこれまで謎に登場したものと似ている。参考として謎Iを見ること。ただし、『透明』が条件だ。透明はどう実現すれば良いだろうか。",
                 buttons: [
                   { text: "透明な矢印のヒントが欲しい", action: "stage2_after_answer_invisible_arrow" },
                   ]
@@ -580,7 +583,7 @@
 
             stage2_after_answer_invisible_arrow_2: {
                 title: "矢印の作り方のヒントがさらに欲しい",
-                description: "4つの紙を中心に隙間ができるように配置し、矢印の輪郭を中に作ることで、透明な矢印が完成する。<br>それを踏まえ、そもそもどの紙を使うのが正しいだろうか。",
+                description: "4つの紙を中心に隙間ができるように配置し、矢印の輪郭を内側に作ることで、透明な矢印が完成する。<br>それを踏まえ、そもそもどの紙を使うのが正しいだろうか。",
                 buttons: [
                   { text: "使う4枚の紙が知りたい", action: "stage2_after_answer_pieces" },
                   ]
